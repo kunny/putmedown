@@ -1,0 +1,24 @@
+<resources>
+
+    <string name="app_name">PutmeDown</string>
+    <string name="enable_protection">Enable protection mode</string>
+    <string name="unlock_method">Unlock method</string>
+
+    <string-array name="unlock_method_titles">
+        <item>PIN</item>
+        <item>NFC Tag</item>
+    </string-array>
+    <string-array name="unlock_method_values">
+        <item>pin</item>
+        <item>nfc</item>
+    </string-array>
+
+    <string name="configure_protection">Configure PIN/Tag for unlock</string>
+    <string name="set_pin_to_unlock">Set PIN to unlock</string>
+    <string name="set_nfc_tag_to_unlock">Set NFC Tag to unlock</string>
+	<string name="pin">PIN</string>
+	<string name="nfc">NFC</string>
+	<string name="nfc_is_not_supported">NFC is not supported.</string>
+	<string name="nfc_is_not_enabled">NFC is not enabled.</string>
+
+</resources>
