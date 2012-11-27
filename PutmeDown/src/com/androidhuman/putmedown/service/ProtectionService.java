@@ -1,45 +1,171 @@
 package com.androidhuman.putmedown.service;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 
-public class ProtectionService extends Service implements SensorEventListener{
+import com.androidhuman.putmedown.R;
+import com.androidhuman.putmedown.activity.NfcUnlockActivity;
+import com.androidhuman.putmedown.activity.PinUnlockActivity;
+import com.androidhuman.putmedown.util.Util;
+import com.androidhuman.putmedown.util.Util.SensorSupport;
+
+public class ProtectionService extends Service{
 	
-	private SensorManager mSensorManager;
-	private Sensor mAccelerometer;
-	private Sensor mOrientation;
+	private AntiTheftListener mAntiTheftListener = new AntiTheftListener(){
+
+		@Override
+		public void onChargerStateChanged(boolean plugged) {
+			// If charger has plugged in, stop listening sensor values.
+			if(plugged){
+				mSensorSupport.stopTracking();
+				
+			}else{ // charger has detached. Enable sensor-based protection service.
+				mSensorSupport.startTracking();
+				
+			}
+		}
+		
+		@Override
+		public void onWarning() {
+			fireWarning();
+		}
+
+		@Override
+		public void onAlarm() {
+			fireAlarm();
+		}
+
+		@Override
+		public void onDismiss() {
+			dismissAlarm();
+		}
+
+	};
 	
 	private IBinder mBinder = new IProtectionService.Stub() {
 		
 		@Override
 		public void enableService() throws RemoteException {
-			mSensorManager.registerListener(ProtectionService.this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+			enableChargerTracking();
+			
 		}
 		
 		@Override
 		public void disableService() throws RemoteException {
-			mSensorManager.unregisterListener(ProtectionService.this, mAccelerometer);
+			disableChargerTracking();
+		}
+
+		@Override
+		public void fireWarning() throws RemoteException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void fireAlarm() throws RemoteException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void dismissAlarm() throws RemoteException {
+			// TODO Auto-generated method stub
+			
 		}
 	};
+	
+	private void fireWarning(){
+		// TODO play warning sound
+	}
+	
+	private void fireAlarm(){
+		showNotification();
+		// TODO Set device's media volume to MAX
+		// TODO Play alarm sound
+		
+	}
+	
+	private void dismissAlarm(){
+		dismissNotification();
+		// TODO stop alarm sound
+	}
+	
+	private void showNotification(){
+		Notification notification = new Notification();
+		String unlockMethod = PreferenceManager
+				.getDefaultSharedPreferences(getApplicationContext())
+				.getString("unlock_method", "pin");
+		
+		PendingIntent intent = 
+				PendingIntent.getActivity(getApplicationContext(), 0, 
+						new Intent(this, unlockMethod.equals("pin") ? PinUnlockActivity.class : NfcUnlockActivity.class), 0);
+		notification.icon = R.drawable.ic_launcher;
+		notification.tickerText = getString(com.androidhuman.putmedown.R.string.anti_theft_alarm);
+		notification.when = System.currentTimeMillis();
+		notification.setLatestEventInfo(getApplicationContext(), getString(R.string.app_name), getString(R.string.enter_pin_or_tag_to_dismiss), intent);
+		
+		notification.flags |= Notification.FLAG_ONGOING_EVENT;
+		NotificationManager notifManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+		notifManager.notify(0, notification);
+	}
+	
+	private void dismissNotification(){
+		NotificationManager notifManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+		notifManager.cancelAll();
+	}
+	
+	private void enableChargerTracking(){
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+		registerReceiver(mBatteryReceiver, filter);
+	}
+	
+	private void disableChargerTracking(){
+		unregisterReceiver(mBatteryReceiver);
+		if(!mSensorSupport.isTracking()){
+			mSensorSupport.startTracking();
+		}
+	}
+	
+	private BroadcastReceiver mBatteryReceiver = new BroadcastReceiver(){
 
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			int pluggedState = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
+			
+			if(pluggedState==0){
+				Util.Charging.setPlugged(getApplicationContext(), false);
+				mAntiTheftListener.onChargerStateChanged(false);
+			}else{
+				Util.Charging.setPlugged(getApplicationContext(), true);
+				mAntiTheftListener.onChargerStateChanged(true);
+			}
+		}
+		
+	};
+	
 	@Override
 	public IBinder onBind(Intent intent) {
 		return mBinder;
 	}
 
+	private SensorSupport mSensorSupport;
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-		mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		
+		mSensorSupport = new SensorSupport(this, mAntiTheftListener);
+
 	}
 
 	@Override
@@ -48,21 +174,29 @@ public class ProtectionService extends Service implements SensorEventListener{
 		return super.onStartCommand(intent, flags, startId);
 	}
 	
+	
 	public interface AntiTheftListener{
 		
-	}
-	
-	// SensorEventListener
-
-	@Override
-	public void onAccuracyChanged(Sensor sensor, int accuracy) {
-		// TODO Auto-generated method stub
+		/**
+		 * Called when charger plugged state has changed.
+		 * @param plugged true when charger has attached to device, false otherwise
+		 */
+		public void onChargerStateChanged(boolean plugged);
 		
-	}
-
-	@Override
-	public void onSensorChanged(SensorEvent event) {
-		// TODO Auto-generated method stub
+		/**
+		 * Called when device's state is unstable but still insufficient to invoke alarm
+		 */
+		public void onWarning();
+		
+		/**
+		 * Called when device is about to stolen.
+		 */
+		public void onAlarm();
+		
+		/**
+		 * Called when user dismissed alarm.
+		 */
+		public void onDismiss();
 		
 	}
 

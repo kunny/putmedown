@@ -19,8 +19,24 @@
                 
             </intent-filter>
         </activity>
-        <activity android:name=".activity.DetailedConfigurationActivity"></activity>
+        <activity android:name=".activity.DetailedConfigurationRedirectorActivity" android:noHistory="true"></activity>
         <service android:name=".service.ProtectionService"></service>
+        
+        <activity android:name="com.androidhuman.putmedown.activity.PinConfigurationActivity"></activity>
+        <activity android:name=".activity.PinUnlockActivity"></activity>
+        <activity android:name=".activity.NfcUnlockActivity" 
+            android:launchMode="singleInstance">
+        	<intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="application/vnd.com.androidhuman.putmedown"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.NfcConfigurationActivity" 
+            android:launchMode="singleInstance">
+
+        </activity>
+        
     </application>
 
 </manifest>

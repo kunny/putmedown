@@ -20,5 +20,13 @@
 	<string name="nfc">NFC</string>
 	<string name="nfc_is_not_supported">NFC is not supported.</string>
 	<string name="nfc_is_not_enabled">NFC is not enabled.</string>
+	<string name="anti_theft_alarm">Anti-theft alarm</string>
+	<string name="enter_pin_or_tag_to_dismiss">Enter PIN or Tag to dismiss</string>
+	<string name="touch_a_tag_for_unlock">Touch a Tag for unlock</string>
+	<string name="invalid_tag">Invalid tag.</string>
+	<string name="touch_a_tag_to_unlock">Touch a Tag to unlock</string>
+	<string name="enter_pin_to_unlock">Enter PIN to unlock</string>
+	<string name="done">Done</string>
+	<string name="enter_pin">Enter PIN</string>
 
 </resources>

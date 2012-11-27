@@ -77,6 +77,7 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 		return false;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 			String key) {
