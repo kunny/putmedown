@@ -22,6 +22,7 @@ import com.androidhuman.putmedown.R;
 public class MainPreferenceActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener{
 
 	/** Called when the activity is first created. */
+	// commit test
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
