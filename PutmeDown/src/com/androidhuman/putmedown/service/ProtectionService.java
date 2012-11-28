@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
@@ -20,6 +21,10 @@ import com.androidhuman.putmedown.util.Util;
 import com.androidhuman.putmedown.util.Util.SensorSupport;
 
 public class ProtectionService extends Service{
+	
+	private Handler mInitialSetupHandler = new Handler(){
+		
+	};
 	
 	private AntiTheftListener mAntiTheftListener = new AntiTheftListener(){
 

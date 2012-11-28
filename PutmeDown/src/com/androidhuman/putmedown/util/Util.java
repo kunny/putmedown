@@ -44,6 +44,7 @@ public class Util {
 			
 		}
 		
+		@SuppressWarnings("deprecation")
 		public SensorSupport(Context context, AntiTheftListener listener){
 			this();
 			mContext = context;
@@ -97,14 +98,33 @@ public class Util {
 	
 	public static class Security{
 		private static final String KEY_PIN = "unlock_pin";
-		public static final String DEFAULT_PIN = "not_set";
+		private static final String KEY_PIN_NFC = "unlock_tag";
 		
-		public static void setUnlockPIN(Context context, String pin){
-			getEditor(context).putString(KEY_PIN, pin).commit();
+		public static final String DEFAULT_PIN = "not_set";
+		public enum PinType{PIN, TAG};
+		
+		public static void setUnlockPIN(Context context, PinType type, String pin){
+			if(type==PinType.PIN){
+				getEditor(context).putString(KEY_PIN, pin).commit();
+			}else{
+				getEditor(context).putString(KEY_PIN_NFC, pin).commit();
+			}
 		}
 		
-		public static String getUnlockPIN(Context context){
-			return getPref(context).getString(KEY_PIN, DEFAULT_PIN);
+		public static String getUnlockPIN(Context context, PinType type){
+			return PinType.PIN == type? 
+					getPref(context).getString(KEY_PIN, DEFAULT_PIN) : 
+						getPref(context).getString(KEY_PIN_NFC, DEFAULT_PIN);
+		}
+		
+		public static boolean isPINSet(Context context, PinType type){
+			if(type == PinType.PIN){
+				return getPref(context)
+						.getString(KEY_PIN, DEFAULT_PIN).equals(DEFAULT_PIN) ? false : true;
+			}else{
+				return getPref(context)
+						.getString(KEY_PIN_NFC, DEFAULT_PIN).equals(DEFAULT_PIN) ? false : true;
+			}
 		}
 		
 		public static String generateRandomPIN(){
