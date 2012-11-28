@@ -16,9 +16,13 @@
         android:id="@+id/edt_activity_configuration_pin_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
         android:ems="10"
+        android:gravity="center_horizontal"
         android:inputType="numberPassword"
-        android:maxLines="1" >
+        android:maxLines="1"
+        android:textSize="60sp" >
 
         <requestFocus />
     </EditText>

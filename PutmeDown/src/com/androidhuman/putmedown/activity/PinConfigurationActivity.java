@@ -4,10 +4,14 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.androidhuman.putmedown.R;
+import com.androidhuman.putmedown.util.Util.Security;
 
 public class PinConfigurationActivity extends Activity {
 
@@ -40,6 +44,17 @@ public class PinConfigurationActivity extends Activity {
 				}else{
 					btnDone.setEnabled(false);
 				}
+			}
+	    	
+	    });
+	    
+	    btnDone.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				Security.setUnlockPIN(getApplicationContext(), edtPin.getText().toString());
+				Toast.makeText(getApplicationContext(), R.string.pin_has_been_set, Toast.LENGTH_SHORT).show();
+				finish();
 			}
 	    	
 	    });

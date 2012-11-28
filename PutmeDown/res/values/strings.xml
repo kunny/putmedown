@@ -28,5 +28,8 @@
 	<string name="enter_pin_to_unlock">Enter PIN to unlock</string>
 	<string name="done">Done</string>
 	<string name="enter_pin">Enter PIN</string>
+	<string name="pin_configuration">PIN Configuration</string>
+	<string name="tag_configuration">Tag configuration</string>
+	<string name="pin_has_been_set">PIN has been set.</string>
 
 </resources>
