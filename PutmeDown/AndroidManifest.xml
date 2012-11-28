@@ -7,6 +7,7 @@
         android:minSdkVersion="10"
         android:targetSdkVersion="16" />
     <uses-feature android:required="false" android:name="android.hardware.nfc"/>
+    <uses-permission android:name="android.permission.NFC"/>
 
     <application
         android:allowBackup="true"
@@ -22,7 +23,7 @@
         <activity android:name=".activity.DetailedConfigurationRedirectorActivity" android:noHistory="true"></activity>
         <service android:name=".service.ProtectionService"></service>
         
-        <activity android:name="com.androidhuman.putmedown.activity.PinConfigurationActivity"></activity>
+        <activity android:name=".activity.PinConfigurationActivity"></activity>
         <activity android:name=".activity.PinUnlockActivity"></activity>
         <activity android:name=".activity.NfcUnlockActivity" 
             android:launchMode="singleInstance">

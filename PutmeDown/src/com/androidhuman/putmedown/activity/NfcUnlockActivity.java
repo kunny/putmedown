@@ -13,6 +13,7 @@ import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.os.RemoteException;
 import android.widget.Toast;
 
 import com.androidhuman.putmedown.R;
@@ -79,8 +80,12 @@ public class NfcUnlockActivity extends Activity {
 	  
 	            	String pinInPref = Security.getUnlockPIN(this);
 	            	if(pinInPref.equals(pin)){
-	            		// TODO dismiss alarm
-	            		
+	            		try{
+	            			mService.dismissAlarm();
+	            			// TODO Play dismiss sound
+	            		}catch(RemoteException e){
+	            			e.printStackTrace();
+	            		}
 	            	}else{
 	            		Toast.makeText(getApplicationContext(), R.string.invalid_tag, Toast.LENGTH_SHORT).show();
 	            		// TODO play error sound

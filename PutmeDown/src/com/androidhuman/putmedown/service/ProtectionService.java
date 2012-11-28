@@ -37,17 +37,20 @@ public class ProtectionService extends Service{
 		
 		@Override
 		public void onWarning() {
-			fireWarning();
+			// TODO play warning sound
 		}
 
 		@Override
 		public void onAlarm() {
-			fireAlarm();
+			showNotification();
+			// TODO Set device's media volume to MAX
+			// TODO Play alarm sound
 		}
 
 		@Override
 		public void onDismiss() {
-			dismissAlarm();
+			dismissNotification();
+			// TODO stop alarm sound
 		}
 
 	};
@@ -62,44 +65,27 @@ public class ProtectionService extends Service{
 		
 		@Override
 		public void disableService() throws RemoteException {
-			disableChargerTracking();
+			disableChargerTracking(true);
 		}
 
 		@Override
 		public void fireWarning() throws RemoteException {
-			// TODO Auto-generated method stub
+			mAntiTheftListener.onWarning();
 			
 		}
 
 		@Override
 		public void fireAlarm() throws RemoteException {
-			// TODO Auto-generated method stub
-			
+			mAntiTheftListener.onAlarm();
 		}
 
 		@Override
 		public void dismissAlarm() throws RemoteException {
-			// TODO Auto-generated method stub
-			
+			mAntiTheftListener.onDismiss();
 		}
 	};
 	
-	private void fireWarning(){
-		// TODO play warning sound
-	}
-	
-	private void fireAlarm(){
-		showNotification();
-		// TODO Set device's media volume to MAX
-		// TODO Play alarm sound
-		
-	}
-	
-	private void dismissAlarm(){
-		dismissNotification();
-		// TODO stop alarm sound
-	}
-	
+	@SuppressWarnings("deprecation")
 	private void showNotification(){
 		Notification notification = new Notification();
 		String unlockMethod = PreferenceManager
@@ -130,9 +116,9 @@ public class ProtectionService extends Service{
 		registerReceiver(mBatteryReceiver, filter);
 	}
 	
-	private void disableChargerTracking(){
+	private void disableChargerTracking(boolean disablingService){
 		unregisterReceiver(mBatteryReceiver);
-		if(!mSensorSupport.isTracking()){
+		if(!disablingService && !mSensorSupport.isTracking()){
 			mSensorSupport.startTracking();
 		}
 	}
@@ -143,6 +129,7 @@ public class ProtectionService extends Service{
 		public void onReceive(Context context, Intent intent) {
 			int pluggedState = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
 			
+			// If device is not connected to charger
 			if(pluggedState==0){
 				Util.Charging.setPlugged(getApplicationContext(), false);
 				mAntiTheftListener.onChargerStateChanged(false);

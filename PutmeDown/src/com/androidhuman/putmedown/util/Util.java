@@ -9,6 +9,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.androidhuman.putmedown.service.ProtectionService.AntiTheftListener;
 
@@ -28,6 +29,7 @@ public class Util {
 	}
 	
 	public static class SensorSupport implements SensorEventListener{
+		private static final String TAG = "SensorSupport";
 		private static final String KEY_ALARM_FIRED = "alarm_fired";
 		
 		private boolean isTracking = false;
@@ -52,11 +54,11 @@ public class Util {
 			mListener = listener;
 		}
 		
-		private void setAlarmFired(boolean fired){
+		public void setAlarmFired(boolean fired){
 			getEditor(mContext).putBoolean(KEY_ALARM_FIRED, fired).commit();
 		}
 		
-		private boolean isAlarmFired(){
+		public boolean isAlarmFired(){
 			return getPref(mContext).getBoolean(KEY_ALARM_FIRED, false);
 		}
 		
@@ -64,11 +66,14 @@ public class Util {
 			isTracking = true;
 			mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 			mSensorManager.registerListener(this, mOrientation, SensorManager.SENSOR_DELAY_NORMAL);
+			Log.d(TAG, "Sensor tracking started.");
 		}
 		
 		public synchronized void stopTracking(){
 			isTracking = false;
 			mSensorManager.unregisterListener(this, mAccelerometer);
+			mSensorManager.unregisterListener(this, mOrientation);
+			Log.d(TAG, "Sensor tracking stopped.");
 		}
 		
 		public boolean isTracking(){

@@ -16,6 +16,7 @@ import android.nfc.tech.Ndef;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.androidhuman.putmedown.R;
 import com.androidhuman.putmedown.util.Util;
 import com.androidhuman.putmedown.util.Util.Security;
 
@@ -26,12 +27,11 @@ public class NfcConfigurationActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
+	    setContentView(R.layout.acrivity_nfc_configuration);
 	    mAdapter = NfcAdapter.getDefaultAdapter(getApplicationContext());
 	    if(mAdapter==null){
 	    	throw new RuntimeException("NFC is not supported.");
 	    }
-	    
-	    
 	}
 	
 	@Override
@@ -55,37 +55,36 @@ public class NfcConfigurationActivity extends Activity {
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		
-		if(NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction())){
-			Tag tag = (Tag)intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-			Ndef ndef = Ndef.get(tag);
-			boolean succeed = false;
+		Tag tag = (Tag)intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+		Ndef ndef = Ndef.get(tag);
+		boolean succeed = false;
+		
+		try{
+			// Connect and write a PIN data into NFC Tag
+			ndef.connect();
+			ndef.writeNdefMessage(generateNfcMessage());
+			succeed = true;
+		}catch(IOException e){
 			
-			try{
-				// Connect and write a PIN data into NFC Tag
-				ndef.connect();
-				ndef.writeNdefMessage(generateNfcMessage());
-				succeed = true;
-			}catch(IOException e){
-				
-				e.printStackTrace();
-				succeed = false;
-			} catch (FormatException e) {
-				e.printStackTrace();
-				succeed = false;
-			} finally{
-				try {
-					ndef.close();
-				} catch (IOException e) {
-				}
-			}
-			
-			if(succeed){
-				Toast.makeText(this, "Tag generated!", Toast.LENGTH_LONG).show();
-				finish();
-			}else{
-				Toast.makeText(this, "Failed to write information on Tag.", Toast.LENGTH_LONG).show();
+			e.printStackTrace();
+			succeed = false;
+		} catch (FormatException e) {
+			e.printStackTrace();
+			succeed = false;
+		} finally{
+			try {
+				ndef.close();
+			} catch (IOException e) {
 			}
 		}
+		
+		if(succeed){
+			Toast.makeText(this, "Tag generated!", Toast.LENGTH_LONG).show();
+			finish();
+		}else{
+			Toast.makeText(this, "Failed to write information on Tag.", Toast.LENGTH_LONG).show();
+		}
+		
 	}
 	
 	private NdefMessage generateNfcMessage(){

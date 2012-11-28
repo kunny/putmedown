@@ -91,22 +91,28 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 			}
 		}else if(key.equals("unlock_method")){
 			String value = sharedPreferences.getString("unlock_method", "pin");
+			
+			Preference unlockMethodPref = getPreferenceScreen().getPreference(Build.VERSION.SDK_INT>=16 ? 0 : 1);
+			Preference detailSettingPref = getPreferenceScreen().getPreference(Build.VERSION.SDK_INT>=16 ? 1 : 2);
+		
 			if(value.equals("nfc")){
 				// If NFC hardware is not available, notify this to user and
 				// Force unlock method set to PIN
 				NfcAdapter adapter = NfcAdapter.getDefaultAdapter(getApplicationContext());
-				Preference unlockMethodPref = getPreferenceScreen().getPreference(Build.VERSION.SDK_INT>=16 ? 0 : 1);
+				
 				if(adapter==null){
 					Toast.makeText(getApplicationContext(), R.string.nfc_is_not_supported, Toast.LENGTH_SHORT).show();
 					sharedPreferences.edit().putString("unlock_method", "pin").commit();
 					
 					unlockMethodPref.setSummary(R.string.pin);
+					detailSettingPref.setSummary(R.string.set_pin_to_unlock);
 				}else{
 					// If device's NFC feature is turned off
 					if(!adapter.isEnabled()){
 						Toast.makeText(getApplicationContext(), R.string.nfc_is_not_enabled, Toast.LENGTH_SHORT).show();
 						sharedPreferences.edit().putString("unlock_method", "pin").commit();
 						unlockMethodPref.setSummary(R.string.pin);
+						detailSettingPref.setSummary(R.string.set_pin_to_unlock);
 						
 						// On IceCreamSandwich or higher, show NFC settings activity
 						// directly
@@ -120,9 +126,11 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 					// NFC is available
 					sharedPreferences.edit().putString("unlock_method", "nfc");
 					unlockMethodPref.setSummary(R.string.nfc);
+					detailSettingPref.setSummary(R.string.set_nfc_tag_to_unlock);
 				}
 			}else{
-				// There are nothing to do on pin unlock mode
+				unlockMethodPref.setSummary(R.string.pin);
+				detailSettingPref.setSummary(R.string.set_pin_to_unlock);
 			}
 		}
 	}

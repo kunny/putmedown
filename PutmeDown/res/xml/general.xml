@@ -14,7 +14,7 @@
 
     <PreferenceScreen android:title="@string/configure_protection" >
         <intent
-            android:targetClass="com.androidhuman.putmedown.activity.DetailedConfigurationActivity"
+            android:targetClass="com.androidhuman.putmedown.activity.DetailedConfigurationRedirectorActivity"
             android:targetPackage="com.androidhuman.putmedown" />
     </PreferenceScreen>
 
