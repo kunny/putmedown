@@ -87,8 +87,12 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 			Toast.makeText(getApplicationContext(), enabled ? "Protection mode enabled" : "Protection mode disabled", Toast.LENGTH_SHORT).show();
 			if(enabled){
 				// TODO 
+				// Start Service for protection
+				
 			}else{
 				// TODO
+				// Stop Service for Protection
+				// Ask for Authority
 			}
 		}else if(key.equals("unlock_method")){
 			String value = sharedPreferences.getString("unlock_method", "pin");
