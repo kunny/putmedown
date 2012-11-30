@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.androidhuman.putmedown.R;
 import com.androidhuman.putmedown.util.Util.Security;
+import com.androidhuman.putmedown.util.Util.Security.PinType;
 
 public class PinConfigurationActivity extends Activity {
 
@@ -52,7 +53,7 @@ public class PinConfigurationActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				Security.setUnlockPIN(getApplicationContext(), edtPin.getText().toString());
+				Security.setUnlockPIN(getApplicationContext(), PinType.PIN, edtPin.getText().toString());
 				Toast.makeText(getApplicationContext(), R.string.pin_has_been_set, Toast.LENGTH_SHORT).show();
 				finish();
 			}

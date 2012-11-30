@@ -4,16 +4,17 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="10dp" >
-    
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:text="@string/enter_pin"
+        android:id="@+id/tv_activity_detailed_configuration_redirector_enter_pin"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <EditText
-        android:id="@+id/edt_activity_configuration_pin_input"
+        android:id="@+id/edt_activity_detailed_configuration_redirector_pin_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="40dp"
@@ -28,12 +29,19 @@
     </EditText>
 
     <Button
-        android:id="@+id/btn_activity_pin_configuration_done"
+        android:id="@+id/btn_activity_detailed_configuration_redirector_done"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:enabled="false"
         android:text="@string/done" />
-    
 
+    <TextView
+        android:id="@+id/tv_activity_detailed_configuration_redirector_touch_tag"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:text="@string/touch_registered_tag_to_proceed"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
 </LinearLayout>

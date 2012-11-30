@@ -20,6 +20,7 @@ import com.androidhuman.putmedown.R;
 import com.androidhuman.putmedown.service.IProtectionService;
 import com.androidhuman.putmedown.service.ProtectionService;
 import com.androidhuman.putmedown.util.Util.Security;
+import com.androidhuman.putmedown.util.Util.Security.PinType;
 
 public class NfcUnlockActivity extends Activity {
 	
@@ -63,36 +64,35 @@ public class NfcUnlockActivity extends Activity {
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		
-		if(NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction())){
-			Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
-	        if (rawMsgs != null) {
-	            NdefMessage[] msgs = new NdefMessage[rawMsgs.length];
-	            for (int i = 0; i < rawMsgs.length; i++) {
-	                msgs[i] = (NdefMessage) rawMsgs[i];
-	            }
-	            
-	            if(msgs.length!=1){
-	            	Toast.makeText(getApplicationContext(), R.string.invalid_tag, Toast.LENGTH_SHORT).show();
-	            }else{
-	            	NdefRecord[] records = msgs[0].getRecords();
-	            	NdefRecord pinRecord = records[0];
-	            	String pin = new String(pinRecord.getPayload(), Charset.forName("US-ASCII"));
-	  
-	            	String pinInPref = Security.getUnlockPIN(this);
-	            	if(pinInPref.equals(pin)){
-	            		try{
-	            			mService.dismissAlarm();
-	            			// TODO Play dismiss sound
-	            		}catch(RemoteException e){
-	            			e.printStackTrace();
-	            		}
-	            	}else{
-	            		Toast.makeText(getApplicationContext(), R.string.invalid_tag, Toast.LENGTH_SHORT).show();
-	            		// TODO play error sound
-	            	}
-	            }
-	        }
-		}
+		Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+        if (rawMsgs != null) {
+            NdefMessage[] msgs = new NdefMessage[rawMsgs.length];
+            for (int i = 0; i < rawMsgs.length; i++) {
+                msgs[i] = (NdefMessage) rawMsgs[i];
+            }
+            
+            if(msgs.length!=1){
+            	Toast.makeText(getApplicationContext(), R.string.invalid_tag, Toast.LENGTH_SHORT).show();
+            }else{
+            	NdefRecord[] records = msgs[0].getRecords();
+            	NdefRecord pinRecord = records[0];
+            	String pin = new String(pinRecord.getPayload(), Charset.forName("US-ASCII"));
+  
+            	String pinInPref = Security.getUnlockPIN(this, PinType.TAG);
+            	if(pinInPref.equals(pin)){
+            		try{
+            			mService.dismissAlarm();
+            			// TODO Play dismiss sound
+            		}catch(RemoteException e){
+            			e.printStackTrace();
+            		}
+            	}else{
+            		Toast.makeText(getApplicationContext(), R.string.invalid_tag, Toast.LENGTH_SHORT).show();
+            		// TODO play error sound
+            	}
+            }
+        }
+		
 	}
 
 }

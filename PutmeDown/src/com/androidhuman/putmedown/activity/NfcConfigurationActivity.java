@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.androidhuman.putmedown.R;
 import com.androidhuman.putmedown.util.Util;
 import com.androidhuman.putmedown.util.Util.Security;
+import com.androidhuman.putmedown.util.Util.Security.PinType;
 
 public class NfcConfigurationActivity extends Activity {
 
@@ -65,7 +66,6 @@ public class NfcConfigurationActivity extends Activity {
 			ndef.writeNdefMessage(generateNfcMessage());
 			succeed = true;
 		}catch(IOException e){
-			
 			e.printStackTrace();
 			succeed = false;
 		} catch (FormatException e) {
@@ -89,7 +89,7 @@ public class NfcConfigurationActivity extends Activity {
 	
 	private NdefMessage generateNfcMessage(){
 		String pin = Security.generateRandomPIN();
-		Util.Security.setUnlockPIN(this, pin);
+		Util.Security.setUnlockPIN(this, PinType.TAG, pin);
 		NdefRecord record = new NdefRecord(
 			    NdefRecord.TNF_MIME_MEDIA ,
 			    "application/vnd.com.androidhuman.putmedown".getBytes(Charset.forName("US-ASCII")),

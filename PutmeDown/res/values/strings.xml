@@ -31,5 +31,8 @@
 	<string name="pin_configuration">PIN Configuration</string>
 	<string name="tag_configuration">Tag configuration</string>
 	<string name="pin_has_been_set">PIN has been set.</string>
+	<string name="touch_registered_tag_to_proceed">Touch registered tag to proceed.</string>
+	<string name="authentication">Authentication</string>
+	<string name="invalid_pin">Invalid PIN.</string>
 
 </resources>

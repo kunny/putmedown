@@ -26,8 +26,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.DetailedConfigurationRedirectorActivity"
-            android:noHistory="true" >
+            android:name=".activity.DetailedConfigurationRedirectorActivity" android:label="@string/authentication">
         </activity>
 
         <service android:name=".service.ProtectionService" >
