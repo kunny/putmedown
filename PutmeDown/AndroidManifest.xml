@@ -31,10 +31,13 @@
 
         <service android:name=".service.ProtectionService" >
         </service>
+        <service android:name=".service.CalibrationService" >
+        </service>
 
         <activity
             android:name=".activity.PinConfigurationActivity"
-            android:parentActivityName="com.androidhuman.activity.MainPreferenceActivity" android:label="@string/pin_configuration">
+            android:label="@string/pin_configuration"
+            android:parentActivityName="com.androidhuman.activity.MainPreferenceActivity" >
         </activity>
         <activity android:name=".activity.PinUnlockActivity" >
         </activity>
@@ -51,7 +54,9 @@
         </activity>
         <activity
             android:name=".activity.NfcConfigurationActivity"
-            android:launchMode="singleInstance" android:parentActivityName="com.androidhuman.putmedown.activity.MainPreferenceActivity" android:label="@string/tag_configuration">
+            android:label="@string/tag_configuration"
+            android:launchMode="singleInstance"
+            android:parentActivityName="com.androidhuman.putmedown.activity.MainPreferenceActivity" >
         </activity>
     </application>
 
