@@ -34,5 +34,49 @@
 	<string name="touch_registered_tag_to_proceed">Touch registered tag to proceed.</string>
 	<string name="authentication">Authentication</string>
 	<string name="invalid_pin">Invalid PIN.</string>
+	<string-array name="activate_sounds">
+		<item >deploying</item>
+		<item >activated</item>
+		<item >hello</item>
+		<item >hello2</item>
+	</string-array>
+	<string-array name="charger_plugged_sounds">
+		<item >hibernating</item>
+		<item >nap_time</item>
+		<item >resting</item>
+		<item >sleep_mode_activated</item>
+	</string-array>
+	<string-array name="charger_detached_sounds">
+		<item >centry_mode_activated</item>
+		<item >dispensing_product</item>
+		<item >gotcha</item>
+		<item >i_see_you</item>
+		<item >searching</item>
+	</string-array>
+	<string-array name="warning_sounds">
+		<item >there_you_are</item>
+		<item >there_you_are2</item>
+		<item >is_anyone_there</item>
+		<item >who_is_there</item>
+	</string-array>
+	<string-array name="alarm_sounds">
+		<item >target_acquired</item>
+		<item >alarm</item>
+	</string-array>
+	<string-array name="dismiss_sounds">
+		<item >target_lost</item>
+		<item >i_dont_blame_you</item>
+		<item >i_dont_hate_you</item>
+	</string-array>
+	<string-array name="shutdown_sounds">
+		<item >good_bye</item>
+	</string-array>
+	<string-array name="error_sounds">
+		<item >critical_error</item>
+		<item >unknown_error</item>
+		<item >who_are_you</item>
+		<item >illegal_operation</item>
+		<item >malfunctioning</item>
+	</string-array>
 
 </resources>

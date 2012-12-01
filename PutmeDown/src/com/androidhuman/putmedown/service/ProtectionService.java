@@ -19,8 +19,12 @@ import com.androidhuman.putmedown.activity.NfcUnlockActivity;
 import com.androidhuman.putmedown.activity.PinUnlockActivity;
 import com.androidhuman.putmedown.util.Util;
 import com.androidhuman.putmedown.util.Util.SensorSupport;
+import com.androidhuman.putmedown.util.Util.SoundSupport;
+import com.androidhuman.putmedown.util.Util.SoundSupport.SoundType;
 
 public class ProtectionService extends Service{
+	
+	private SoundSupport mSoundSupport;
 	
 	private Handler mInitialSetupHandler = new Handler(){
 		
@@ -65,12 +69,13 @@ public class ProtectionService extends Service{
 		@Override
 		public void enableService() throws RemoteException {
 			enableChargerTracking();
-			
+			mSoundSupport.play(SoundType.ACTIVATE);
 		}
 		
 		@Override
 		public void disableService() throws RemoteException {
 			disableChargerTracking(true);
+			mSoundSupport.play(SoundType.SHUTDOWN);
 		}
 
 		@Override
@@ -157,7 +162,7 @@ public class ProtectionService extends Service{
 	public void onCreate() {
 		super.onCreate();
 		mSensorSupport = new SensorSupport(this, mAntiTheftListener);
-
+		mSoundSupport = new SoundSupport(this);
 	}
 
 	@Override
