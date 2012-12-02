@@ -1,5 +1,7 @@
 package com.androidhuman.putmedown.util;
 
+import java.util.HashMap;
+import java.util.Random;
 import java.util.UUID;
 
 import android.content.Context;
@@ -8,9 +10,12 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.androidhuman.putmedown.R;
 import com.androidhuman.putmedown.service.ProtectionService.AntiTheftListener;
 
 public class Util {
@@ -198,12 +203,120 @@ public class Util {
 			return UUID.randomUUID().toString();
 		}
 	}
+	public static class SoundSupport{
+		
+		public enum SoundType{ACTIVATE, CHARGER_PLUGGED, CHARGER_DETACHED, WARNING, ALARM, DISMISS, SHUTDOWN, ERROR};
+		
+		private Context mContext;
+		private SoundPool mSoundPool;
+		private Random mRandom;
+		
+		private String[] mActivateSounds;
+		private String[] mChargerPluggedSounds;
+		private String[] mChargerDetachedSounds;
+		private String[] mWarningSounds;
+		private String[] mAlarmSounds;
+		private String[] mDismissSounds;
+		private String[] mShutdownSounds;
+		private String[] mErrorSounds;
+		
+		private HashMap<String, Integer> mLoadStatus;
+		
+		public SoundSupport(Context context){
+			mContext = context;
+			mSoundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+			mRandom = new Random();
+			
+			mActivateSounds = mContext.getResources().getStringArray(R.array.activate_sounds);
+			mChargerPluggedSounds = mContext.getResources().getStringArray(R.array.charger_plugged_sounds);
+			mChargerDetachedSounds = mContext.getResources().getStringArray(R.array.charger_detached_sounds);
+			mWarningSounds = mContext.getResources().getStringArray(R.array.warning_sounds);
+			mAlarmSounds = mContext.getResources().getStringArray(R.array.alarm_sounds);
+			mDismissSounds = mContext.getResources().getStringArray(R.array.dismiss_sounds);
+			mShutdownSounds = mContext.getResources().getStringArray(R.array.shutdown_sounds);
+			mErrorSounds = mContext.getResources().getStringArray(R.array.error_sounds);
+			
+			mLoadStatus = new HashMap<String, Integer>();
+		}
+		
+		public void play(SoundType type){
+			
+			switch(type){
+			case ACTIVATE:
+				mSoundPool.play(getSoundIdByName(getRandomSoundNameOnList(mActivateSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
+				break;
+				
+			case CHARGER_PLUGGED:
+				mSoundPool.play(getSoundIdByName(getRandomSoundNameOnList(mChargerPluggedSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
+				break;
+				
+			case CHARGER_DETACHED:
+				mSoundPool.play(getSoundIdByName(getRandomSoundNameOnList(mChargerDetachedSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
+				break;
+				
+			case WARNING:
+				mSoundPool.play(getSoundIdByName(getRandomSoundNameOnList(mWarningSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
+				break;
+				
+			case ALARM:
+				mSoundPool.play(getSoundIdByName(mAlarmSounds[0]), 1.0f, 1.0f, 1, 0, 1.0f);
+				mSoundPool.play(getSoundIdByName(mAlarmSounds[1]), 1.0f, 1.0f, 1, -1, 1.0f);
+				break;
+				
+			case DISMISS:
+				mSoundPool.stop(getSoundIdByName(mAlarmSounds[1]));
+				mSoundPool.play(getSoundIdByName(getRandomSoundNameOnList(mDismissSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
+				break;
+				
+			case SHUTDOWN:
+				mSoundPool.play(getSoundIdByName(getRandomSoundNameOnList(mShutdownSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
+				break;
+				
+			case ERROR:
+				mSoundPool.play(getSoundIdByName(getRandomSoundNameOnList(mErrorSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
+				break;
+				
+			}
+		}
+		
+		private String getRandomSoundNameOnList(String[] list){
+			return list[getRandomIndex(list.length)];
+		}
+		
+		private int getSoundIdByName(String name) throws IllegalArgumentException{
+			int id = mContext.getResources().getIdentifier(name, "raw", mContext.getPackageName());
+			if(id==0){
+				throw new IllegalArgumentException("Cannot find sound resource with given name="+name);
+			}
+			
+			// Sound is not yet loaded
+			if(!mLoadStatus.containsKey(name)){
+				int soundId = mSoundPool.load(mContext, id, 1);
+				// Put load status into map
+				mLoadStatus.put(name, soundId);
+			}
+			return mLoadStatus.get(name);
+		}
+		
+		private int getRandomIndex(int size){
+			return mRandom.nextInt(size);
+		}
+		
+		public void destroy(){
+			mSoundPool.release();
+		}
+		
+		@Override
+		protected void finalize(){
+			destroy();
+		}
+	}
 
 	private static SharedPreferences.Editor getEditor(Context context) {
 		return getPref(context).edit();
 	}
-
-	private static SharedPreferences getPref(Context context) {
+	
+	private static SharedPreferences getPref(Context context){
 		return PreferenceManager.getDefaultSharedPreferences(context);
 	}
 

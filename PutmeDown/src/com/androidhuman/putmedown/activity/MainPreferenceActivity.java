@@ -1,12 +1,17 @@
 package com.androidhuman.putmedown.activity;
 
 import android.annotation.TargetApi;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -18,11 +23,32 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.androidhuman.putmedown.R;
+import com.androidhuman.putmedown.service.IProtectionService;
+import com.androidhuman.putmedown.service.ProtectionService;
 
 public class MainPreferenceActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener{
+	
+	private IProtectionService mService;
+	private ServiceConnection conn = new ServiceConnection(){
+
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			mService = IProtectionService.Stub.asInterface(service);
+			try {
+				mService.enableService();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			mService = null;
+		}
+		
+	};
 
 	/** Called when the activity is first created. */
-	// commit test
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -68,6 +94,7 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 						editor.putBoolean("enabled", false);
 					}
 					editor.commit();
+					
 				}
 				
 			});
@@ -86,15 +113,17 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 			boolean enabled = sharedPreferences.getBoolean("enabled", false);
 			Toast.makeText(getApplicationContext(), enabled ? "Protection mode enabled" : "Protection mode disabled", Toast.LENGTH_SHORT).show();
 			if(enabled){
-				// TODO 
-				// Start Service for protection
-				//startService(new Intent("com.androidhuman.putmedown.service.ProtectionService"));
-				
+				startService(new Intent(MainPreferenceActivity.this, ProtectionService.class));
+				bindService(new Intent(MainPreferenceActivity.this, ProtectionService.class), conn, Context.BIND_AUTO_CREATE);
 			}else{
-				// TODO
-				// Stop Service for Protection
-				// Ask for Authority
-				//stopService(new Intent("com.androidhuman.putmedown.service.ProtectionService"));
+				if(mService!=null){
+					try {
+						mService.disableService();
+					} catch (RemoteException e) {
+						e.printStackTrace();
+					}
+				}
+				stopService(new Intent(MainPreferenceActivity.this, ProtectionService.class));
 			}
 		}else if(key.equals("unlock_method")){
 			String value = sharedPreferences.getString("unlock_method", "pin");
