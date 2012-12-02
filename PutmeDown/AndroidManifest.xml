@@ -31,8 +31,6 @@
 
         <service android:name=".service.ProtectionService" >
         </service>
-        <service android:name=".service.CalibrationService" >
-        </service>
 
         <activity
             android:name=".activity.PinConfigurationActivity"

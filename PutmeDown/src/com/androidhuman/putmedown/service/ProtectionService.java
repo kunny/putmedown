@@ -8,6 +8,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.IBinder;
@@ -152,12 +154,12 @@ public class ProtectionService extends Service{
 	}
 
 	private SensorSupport mSensorSupport;
+	//private Sensor mGyro;
 	
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		mSensorSupport = new SensorSupport(this, mAntiTheftListener);
-
 	}
 
 	@Override

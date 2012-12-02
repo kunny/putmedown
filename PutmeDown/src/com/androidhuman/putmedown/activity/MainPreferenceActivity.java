@@ -88,11 +88,13 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 			if(enabled){
 				// TODO 
 				// Start Service for protection
+				//startService(new Intent("com.androidhuman.putmedown.service.ProtectionService"));
 				
 			}else{
 				// TODO
 				// Stop Service for Protection
 				// Ask for Authority
+				//stopService(new Intent("com.androidhuman.putmedown.service.ProtectionService"));
 			}
 		}else if(key.equals("unlock_method")){
 			String value = sharedPreferences.getString("unlock_method", "pin");
