@@ -27,6 +27,7 @@ import com.androidhuman.putmedown.util.Util.SoundSupport.SoundType;
 public class ProtectionService extends Service{
 	
 	private SoundSupport mSoundSupport;
+	private boolean isBatteryListenerRegistered = false;
 	
 	private Handler mInitialSetupHandler = new Handler(){
 		
@@ -95,6 +96,11 @@ public class ProtectionService extends Service{
 		public void dismissAlarm() throws RemoteException {
 			mAntiTheftListener.onDismiss();
 		}
+
+		@Override
+		public void playSound(String soundName) throws RemoteException {
+			mSoundSupport.play(soundName);
+		}
 	};
 	
 	@SuppressWarnings("deprecation")
@@ -126,10 +132,13 @@ public class ProtectionService extends Service{
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(Intent.ACTION_BATTERY_CHANGED);
 		registerReceiver(mBatteryReceiver, filter);
+		isBatteryListenerRegistered = true;
 	}
 	
 	private void disableChargerTracking(boolean disablingService){
-		unregisterReceiver(mBatteryReceiver);
+		if(isBatteryListenerRegistered){
+			//unregisterReceiver(mBatteryReceiver);
+		}
 		if(!disablingService && !mSensorSupport.isTracking()){
 			mSensorSupport.startTracking();
 		}
@@ -166,6 +175,7 @@ public class ProtectionService extends Service{
 		super.onCreate();
 		mSensorSupport = new SensorSupport(this, mAntiTheftListener);
 		mSoundSupport = new SoundSupport(this);
+		mSoundSupport.loadSounds();
 	}
 
 	@Override

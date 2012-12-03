@@ -6,4 +6,5 @@ interface IProtectionService{
 	void fireWarning();
 	void fireAlarm();
 	void dismissAlarm();
+	void playSound(String soundName);
 }

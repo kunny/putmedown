@@ -1,7 +1,12 @@
 package com.androidhuman.putmedown.activity;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -11,10 +16,28 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.androidhuman.putmedown.R;
+import com.androidhuman.putmedown.service.IProtectionService;
+import com.androidhuman.putmedown.service.ProtectionService;
 import com.androidhuman.putmedown.util.Util.Security;
 import com.androidhuman.putmedown.util.Util.Security.PinType;
 
 public class PinConfigurationActivity extends Activity {
+	
+	private IProtectionService mService;
+	private ServiceConnection conn = new ServiceConnection(){
+
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			mService = IProtectionService.Stub.asInterface(service);
+			
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+
+		}
+		
+	};
 
 	EditText edtPin;
 	Button btnDone;
@@ -60,5 +83,7 @@ public class PinConfigurationActivity extends Activity {
 	    	
 	    });
 	}
+	
+
 
 }

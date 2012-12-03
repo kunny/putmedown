@@ -54,16 +54,18 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
 	    
+	    startService(new Intent(MainPreferenceActivity.this, ProtectionService.class));
+	    
 	    this.addPreferencesFromResource(R.xml.general);
 	    
 	    SharedPreferences defaultPref = PreferenceManager.getDefaultSharedPreferences(this);
 	    
-	    Preference detailSettingPref = getPreferenceScreen().getPreference(Build.VERSION.SDK_INT>=16 ? 1 : 2);
+	    Preference detailSettingPref = getPreferenceScreen().getPreference(Build.VERSION.SDK_INT>=14 ? 1 : 2);
 	    detailSettingPref.setSummary(
 	    		defaultPref.getString("unlock_method", "pin").equals("pin") ? 
 	    				R.string.set_pin_to_unlock : R.string.set_nfc_tag_to_unlock);
 	    
-	    Preference unlockMethodPref = getPreferenceScreen().getPreference(Build.VERSION.SDK_INT>=16 ? 0 : 1);
+	    Preference unlockMethodPref = getPreferenceScreen().getPreference(Build.VERSION.SDK_INT>=14 ? 0 : 1);
 	    unlockMethodPref.setSummary(
 	    		defaultPref.getString("unlock_method", "pin").equals("pin") ? 
 	    				R.string.pin : R.string.nfc);
@@ -80,7 +82,7 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 		getMenuInflater().inflate(R.menu.general, menu);
 		
 		// Get an instance of switch on the actionview
-		if(Build.VERSION.SDK_INT >= 16){
+		if(Build.VERSION.SDK_INT >= 14){
 			Switch enableSwitch = (Switch)menu.getItem(0).getActionView();
 			enableSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener(){
 	
@@ -113,7 +115,7 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 			boolean enabled = sharedPreferences.getBoolean("enabled", false);
 			Toast.makeText(getApplicationContext(), enabled ? "Protection mode enabled" : "Protection mode disabled", Toast.LENGTH_SHORT).show();
 			if(enabled){
-				startService(new Intent(MainPreferenceActivity.this, ProtectionService.class));
+				
 				bindService(new Intent(MainPreferenceActivity.this, ProtectionService.class), conn, Context.BIND_AUTO_CREATE);
 			}else{
 				if(mService!=null){
@@ -128,8 +130,8 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 		}else if(key.equals("unlock_method")){
 			String value = sharedPreferences.getString("unlock_method", "pin");
 			
-			Preference unlockMethodPref = getPreferenceScreen().getPreference(Build.VERSION.SDK_INT>=16 ? 0 : 1);
-			Preference detailSettingPref = getPreferenceScreen().getPreference(Build.VERSION.SDK_INT>=16 ? 1 : 2);
+			Preference unlockMethodPref = getPreferenceScreen().getPreference(Build.VERSION.SDK_INT>=14 ? 0 : 1);
+			Preference detailSettingPref = getPreferenceScreen().getPreference(Build.VERSION.SDK_INT>=14 ? 1 : 2);
 		
 			if(value.equals("nfc")){
 				// If NFC hardware is not available, notify this to user and
@@ -152,7 +154,7 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 						
 						// On IceCreamSandwich or higher, show NFC settings activity
 						// directly
-						if(Build.VERSION.SDK_INT >= 16){
+						if(Build.VERSION.SDK_INT >= 14){
 							startActivity(new Intent(Settings.ACTION_NFC_SETTINGS));
 						}else{
 							startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));

@@ -5,7 +5,7 @@
         android:entries="@array/unlock_method_titles"
         android:entryValues="@array/unlock_method_values"
         android:key="unlock_method"
-        android:title="@string/unlock_method" />
+        android:title="@string/unlock_method" android:defaultValue="pin"/>
 
     <PreferenceScreen android:title="@string/configure_protection" >
         <intent

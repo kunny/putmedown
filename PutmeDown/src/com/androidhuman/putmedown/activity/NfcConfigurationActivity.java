@@ -5,8 +5,11 @@ import java.nio.charset.Charset;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.nfc.FormatException;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
@@ -14,15 +17,35 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.widget.Toast;
 
 import com.androidhuman.putmedown.R;
+import com.androidhuman.putmedown.service.IProtectionService;
+import com.androidhuman.putmedown.service.ProtectionService;
 import com.androidhuman.putmedown.util.Util;
 import com.androidhuman.putmedown.util.Util.Security;
 import com.androidhuman.putmedown.util.Util.Security.PinType;
 
 public class NfcConfigurationActivity extends Activity {
 
+	private IProtectionService mService;
+	private ServiceConnection conn = new ServiceConnection(){
+
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			mService = IProtectionService.Stub.asInterface(service);
+			
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+
+		}
+		
+	};
+	
 	NfcAdapter mAdapter;
 	
 	@Override
@@ -38,6 +61,7 @@ public class NfcConfigurationActivity extends Activity {
 	@Override
 	public void onResume(){
 		super.onResume();
+		bindService(new Intent(this, ProtectionService.class), conn, Context.BIND_AUTO_CREATE);
 		PendingIntent pendingIntent = PendingIntent.getActivity(
 	    	    this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
 	    
@@ -49,6 +73,7 @@ public class NfcConfigurationActivity extends Activity {
 	@Override
 	public void onPause(){
 		super.onPause();
+		unbindService(conn);
 		mAdapter.disableForegroundDispatch(this);
 	}
 
@@ -65,13 +90,14 @@ public class NfcConfigurationActivity extends Activity {
 			ndef.connect();
 			ndef.writeNdefMessage(generateNfcMessage());
 			succeed = true;
+			
 		}catch(IOException e){
 			e.printStackTrace();
 			succeed = false;
 		} catch (FormatException e) {
 			e.printStackTrace();
 			succeed = false;
-		} finally{
+		}finally{
 			try {
 				ndef.close();
 			} catch (IOException e) {
@@ -79,9 +105,19 @@ public class NfcConfigurationActivity extends Activity {
 		}
 		
 		if(succeed){
+			try {
+				mService.playSound("dispensing_product");
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
 			Toast.makeText(this, "Tag generated!", Toast.LENGTH_LONG).show();
 			finish();
 		}else{
+			try {
+				mService.playSound("critical_error");
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
 			Toast.makeText(this, "Failed to write information on Tag.", Toast.LENGTH_LONG).show();
 		}
 		

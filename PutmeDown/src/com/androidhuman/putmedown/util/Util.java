@@ -220,7 +220,7 @@ public class Util {
 		private String[] mShutdownSounds;
 		private String[] mErrorSounds;
 		
-		private HashMap<String, Integer> mLoadStatus;
+		private HashMap<String, Integer> mSoundIds;
 		
 		public SoundSupport(Context context){
 			mContext = context;
@@ -236,47 +236,70 @@ public class Util {
 			mShutdownSounds = mContext.getResources().getStringArray(R.array.shutdown_sounds);
 			mErrorSounds = mContext.getResources().getStringArray(R.array.error_sounds);
 			
-			mLoadStatus = new HashMap<String, Integer>();
+			mSoundIds = new HashMap<String, Integer>();
+			
+		}
+		
+		public void loadSounds(){
+			loadSoundInArray(mActivateSounds);
+			loadSoundInArray(mChargerPluggedSounds);
+			loadSoundInArray(mChargerDetachedSounds);
+			loadSoundInArray(mWarningSounds);
+			loadSoundInArray(mAlarmSounds);
+			loadSoundInArray(mDismissSounds);
+			loadSoundInArray(mShutdownSounds);
+			loadSoundInArray(mErrorSounds);
+		}
+		
+		private void loadSoundInArray(String[] sounds){
+			for(String soundName : sounds){
+				int soundId = mSoundPool.load(mContext, getSoundIdByName(soundName), 1);
+				mSoundIds.put(soundName, soundId);
+			}
 		}
 		
 		public void play(SoundType type){
 			
 			switch(type){
 			case ACTIVATE:
-				mSoundPool.play(getSoundIdByName(getRandomSoundNameOnList(mActivateSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
+				mSoundPool.play(mSoundIds.get(getRandomSoundNameOnList(mActivateSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
 				break;
 				
 			case CHARGER_PLUGGED:
-				mSoundPool.play(getSoundIdByName(getRandomSoundNameOnList(mChargerPluggedSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
+				mSoundPool.play(mSoundIds.get(getRandomSoundNameOnList(mChargerPluggedSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
 				break;
 				
 			case CHARGER_DETACHED:
-				mSoundPool.play(getSoundIdByName(getRandomSoundNameOnList(mChargerDetachedSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
+				mSoundPool.play(mSoundIds.get(getRandomSoundNameOnList(mChargerDetachedSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
 				break;
 				
 			case WARNING:
-				mSoundPool.play(getSoundIdByName(getRandomSoundNameOnList(mWarningSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
+				mSoundPool.play(mSoundIds.get(getRandomSoundNameOnList(mWarningSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
 				break;
 				
 			case ALARM:
-				mSoundPool.play(getSoundIdByName(mAlarmSounds[0]), 1.0f, 1.0f, 1, 0, 1.0f);
-				mSoundPool.play(getSoundIdByName(mAlarmSounds[1]), 1.0f, 1.0f, 1, -1, 1.0f);
+				mSoundPool.play(mSoundIds.get(mAlarmSounds[0]), 1.0f, 1.0f, 1, 0, 1.0f);
+				mSoundPool.play(mSoundIds.get(mAlarmSounds[1]), 1.0f, 1.0f, 1, -1, 1.0f);
 				break;
 				
 			case DISMISS:
-				mSoundPool.stop(getSoundIdByName(mAlarmSounds[1]));
-				mSoundPool.play(getSoundIdByName(getRandomSoundNameOnList(mDismissSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
+				mSoundPool.stop(mSoundIds.get(mAlarmSounds[1]));
+				mSoundPool.play(mSoundIds.get(getRandomSoundNameOnList(mDismissSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
 				break;
 				
 			case SHUTDOWN:
-				mSoundPool.play(getSoundIdByName(getRandomSoundNameOnList(mShutdownSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
+				mSoundPool.play(mSoundIds.get(getRandomSoundNameOnList(mShutdownSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
 				break;
 				
 			case ERROR:
-				mSoundPool.play(getSoundIdByName(getRandomSoundNameOnList(mErrorSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
+				mSoundPool.play(mSoundIds.get(getRandomSoundNameOnList(mErrorSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
 				break;
 				
 			}
+		}
+		
+		public void play(String soundName){
+			mSoundPool.play(mSoundIds.get(soundName), 1.0f, 1.0f, 1, 0, 1.0f);
 		}
 		
 		private String getRandomSoundNameOnList(String[] list){
@@ -289,13 +312,7 @@ public class Util {
 				throw new IllegalArgumentException("Cannot find sound resource with given name="+name);
 			}
 			
-			// Sound is not yet loaded
-			if(!mLoadStatus.containsKey(name)){
-				int soundId = mSoundPool.load(mContext, id, 1);
-				// Put load status into map
-				mLoadStatus.put(name, soundId);
-			}
-			return mLoadStatus.get(name);
+			return id;
 		}
 		
 		private int getRandomIndex(int size){
