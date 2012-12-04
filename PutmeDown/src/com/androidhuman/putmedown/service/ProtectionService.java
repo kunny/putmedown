@@ -50,10 +50,12 @@ public class ProtectionService extends Service{
 		@Override
 		public void onWarning() {
 			// TODO play warning sound
+			mSoundSupport.play(SoundType.WARNING);
 		}
 
 		@Override
 		public void onAlarm() {
+			mSensorSupport.setAlarmFired(true);
 			showNotification();
 			// TODO Set device's media volume to MAX
 			// TODO Play alarm sound
@@ -61,7 +63,9 @@ public class ProtectionService extends Service{
 
 		@Override
 		public void onDismiss() {
+			mSensorSupport.setAlarmFired(false);
 			dismissNotification();
+			mSoundSupport.play(SoundType.DISMISS);
 			// TODO stop alarm sound
 		}
 
@@ -125,7 +129,7 @@ public class ProtectionService extends Service{
 	
 	private void dismissNotification(){
 		NotificationManager notifManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-		notifManager.cancelAll();
+		notifManager.cancel(0);
 	}
 	
 	private void enableChargerTracking(){
