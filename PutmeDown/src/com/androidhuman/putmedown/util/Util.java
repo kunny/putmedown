@@ -1,5 +1,6 @@
 package com.androidhuman.putmedown.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
@@ -45,13 +46,21 @@ public class Util {
 		private Sensor mAccelerometer;
 		private Sensor mOrientation;
 		private Context mContext;
+		
+		private ArrayList<Float> mAxis = new ArrayList<Float>();
 
-		private float axis_x;
-		private float axis_y;
-		private float axis_z;
+		private float axis_x = 0.f;
+		private float axis_y = 0.f;
+		private float axis_z = 0.f;
 		private float velo_x = 0.f;
 		private float velo_y = 0.f;
 		private float velo_z = 0.f;
+		private float rot_x = 0.f;
+		private float rot_y = 0.f;
+		private float rot_z = 0.f;
+		private float acc_x = 0.f;
+		private float acc_y = 0.f;
+		private float acc_z = 0.f;
 		private float rot_criteria = 10.f;
 		private float acc_criteria = 3.f;
 
@@ -119,48 +128,50 @@ public class Util {
 			// }else if(isAlarmFired())
 			// mListener.onDismiss();
 
-			float rot_x = 0.f;
-			float rot_y = 0.f;
-			float rot_z = 0.f;
-			float acc_x = 0.f;
-			float acc_y = 0.f;
-			float acc_z = 0.f;
-
 			if (event.sensor == mOrientation) {
 				rot_x = event.values[0];
 				rot_y = event.values[1];
 				rot_z = event.values[2];
-				Log.d(TAG, "onSensorChanged: " + rot_x + ", " + rot_y + ", "
+				Log.d(TAG, "onSensorChanged-rot: " + rot_x + ", " + rot_y + ", "
 						+ rot_z);
+				sensorChanged++;
 			} else if (event.sensor == mAccelerometer) {
 				acc_x = event.values[0];
 				acc_y = event.values[0];
 				acc_z = event.values[0];
-				Log.d(TAG, "onSensorChanged: " + acc_x + ", " + acc_y + ", "
+				Log.d(TAG, "onSensorChanged-acc: " + acc_x + ", " + acc_y + ", "
 						+ acc_z);
 			}
 
-			if (sensorChanged == 0) {
+			if (sensorChanged == 1) {
 				axis_x = rot_x;
 				axis_y = rot_y;
 				axis_z = rot_z;
-			} else if (sensorChanged >= 1) {
+				mAxis.add(axis_x);
+				mAxis.add(axis_y);
+				mAxis.add(axis_z);
+				Log.w(TAG, "onSensorChanged-axis: " + axis_x + ", " + axis_y + ", "
+						+ axis_z);
+			} else if (sensorChanged >= 2) {
 
-				if (Math.abs(axis_x - rot_x) > rot_criteria
-						|| Math.abs(axis_y - rot_y) > rot_criteria
-						|| Math.abs(axis_z - rot_z) > rot_criteria) {
+				if (Math.abs(mAxis.get(0) - rot_x) > rot_criteria
+						|| Math.abs(mAxis.get(1) - rot_y) > rot_criteria
+						|| Math.abs(mAxis.get(2) - rot_z) > rot_criteria) {
 					mListener.onAlarm();
+					Log.w(TAG, "Ring the Alarm-rot");
+					Log.w(TAG, "onSensorChanged-axis: " + mAxis.get(0) + ", " + mAxis.get(1) + ", "
+							+ mAxis.get(2));
+					Log.e(TAG, "sub: " + Math.abs(mAxis.get(0) - rot_x) + ", " + Math.abs(mAxis.get(1) - rot_y) + ", "
+						+ Math.abs(mAxis.get(2) - rot_z));
 				}else if(Math.abs(velo_x - acc_x) > acc_criteria
 						|| Math.abs(velo_y - acc_y) > acc_criteria
 						|| Math.abs(velo_z - acc_z) > acc_criteria){
 					mListener.onAlarm();
+					Log.w(TAG, "Ring the Alarm-acc");
 				}else if(isAlarmFired()){
 					mListener.onDismiss();
 				}
 			}
-
-			sensorChanged++;
-
 		}
 	}
 

@@ -26,7 +26,7 @@ import com.androidhuman.putmedown.util.Util.SoundSupport.SoundType;
 
 public class ProtectionService extends Service{
 	
-	private SoundSupport mSoundSupport;
+	//private SoundSupport mSoundSupport;
 	private boolean isBatteryListenerRegistered = false;
 	
 	private Handler mInitialSetupHandler = new Handler(){
@@ -72,13 +72,13 @@ public class ProtectionService extends Service{
 		@Override
 		public void enableService() throws RemoteException {
 			enableChargerTracking();
-			mSoundSupport.play(SoundType.ACTIVATE);
+			//mSoundSupport.play(SoundType.ACTIVATE);
 		}
 		
 		@Override
 		public void disableService() throws RemoteException {
 			disableChargerTracking(true);
-			mSoundSupport.play(SoundType.SHUTDOWN);
+			//mSoundSupport.play(SoundType.SHUTDOWN);
 		}
 
 		@Override
@@ -99,7 +99,7 @@ public class ProtectionService extends Service{
 
 		@Override
 		public void playSound(String soundName) throws RemoteException {
-			mSoundSupport.play(soundName);
+			//mSoundSupport.play(soundName);
 		}
 	};
 	
@@ -174,8 +174,8 @@ public class ProtectionService extends Service{
 	public void onCreate() {
 		super.onCreate();
 		mSensorSupport = new SensorSupport(this, mAntiTheftListener);
-		mSoundSupport = new SoundSupport(this);
-		mSoundSupport.loadSounds();
+		//mSoundSupport = new SoundSupport(this);
+		//mSoundSupport.loadSounds();
 	}
 
 	@Override
