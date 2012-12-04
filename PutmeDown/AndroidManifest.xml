@@ -29,7 +29,7 @@
             android:name=".activity.DetailedConfigurationRedirectorActivity" android:label="@string/authentication">
         </activity>
 
-        <service android:name=".service.ProtectionService" >
+        <service android:name=".service.ProtectionService" android:process=":remote">
         </service>
 
         <activity

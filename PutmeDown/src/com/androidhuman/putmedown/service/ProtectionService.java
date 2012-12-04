@@ -26,12 +26,9 @@ import com.androidhuman.putmedown.util.Util.SoundSupport.SoundType;
 
 public class ProtectionService extends Service{
 	
-	//private SoundSupport mSoundSupport;
+	public static final String ACTION_ALARM_FIRED = "com.androidhuman.putmedown.intent.action.ALARM_FIRED";
+	private SoundSupport mSoundSupport;
 	private boolean isBatteryListenerRegistered = false;
-	
-	private Handler mInitialSetupHandler = new Handler(){
-		
-	};
 	
 	private AntiTheftListener mAntiTheftListener = new AntiTheftListener(){
 
@@ -42,7 +39,7 @@ public class ProtectionService extends Service{
 				mSensorSupport.stopTracking();
 				
 			}else{ // charger has detached. Enable sensor-based protection service.
-				mSensorSupport.startTracking();
+				mSensorSupport.stabilize();
 				
 			}
 		}
@@ -57,8 +54,8 @@ public class ProtectionService extends Service{
 		public void onAlarm() {
 			mSensorSupport.setAlarmFired(true);
 			showNotification();
-			// TODO Set device's media volume to MAX
-			// TODO Play alarm sound
+			mSoundSupport.play(SoundType.ALARM);
+			sendBroadcast(new Intent(ACTION_ALARM_FIRED));
 		}
 
 		@Override
@@ -66,7 +63,6 @@ public class ProtectionService extends Service{
 			mSensorSupport.setAlarmFired(false);
 			dismissNotification();
 			mSoundSupport.play(SoundType.DISMISS);
-			// TODO stop alarm sound
 		}
 
 	};
@@ -75,14 +71,21 @@ public class ProtectionService extends Service{
 		
 		@Override
 		public void enableService() throws RemoteException {
-			enableChargerTracking();
-			//mSoundSupport.play(SoundType.ACTIVATE);
+			PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("enabled", true).commit();
+			//enableChargerTracking();
+			mSensorSupport.stabilize();
+			mSoundSupport.play(SoundType.ACTIVATE);
 		}
 		
 		@Override
 		public void disableService() throws RemoteException {
-			disableChargerTracking(true);
-			//mSoundSupport.play(SoundType.SHUTDOWN);
+			PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("enabled", false).commit();
+			//disableChargerTracking(true);
+			mSensorSupport.stopTracking();
+			mSoundSupport.play(SoundType.SHUTDOWN);
+			mSoundSupport = null;
+			mSensorSupport = null;
+			stopSelf();
 		}
 
 		@Override
@@ -103,7 +106,7 @@ public class ProtectionService extends Service{
 
 		@Override
 		public void playSound(String soundName) throws RemoteException {
-			//mSoundSupport.play(soundName);
+			mSoundSupport.play(soundName);
 		}
 	};
 	
@@ -177,15 +180,19 @@ public class ProtectionService extends Service{
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		mSensorSupport = new SensorSupport(this, mAntiTheftListener);
-		//mSoundSupport = new SoundSupport(this);
-		//mSoundSupport.loadSounds();
+		if(mSensorSupport==null){
+			mSensorSupport = new SensorSupport(this, mAntiTheftListener);
+		}
+		if(mSoundSupport==null){
+			mSoundSupport = new SoundSupport(this);
+			mSoundSupport.loadSounds();
+		}
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		
-		return super.onStartCommand(intent, flags, startId);
+		return Service.START_NOT_STICKY;
 	}
 	
 	

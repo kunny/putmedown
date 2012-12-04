@@ -1,9 +1,11 @@
 package com.androidhuman.putmedown.activity;
 
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -25,6 +27,7 @@ import android.widget.Toast;
 import com.androidhuman.putmedown.R;
 import com.androidhuman.putmedown.service.IProtectionService;
 import com.androidhuman.putmedown.service.ProtectionService;
+import com.androidhuman.putmedown.util.Util;
 
 public class MainPreferenceActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener{
 	
@@ -34,11 +37,6 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			mService = IProtectionService.Stub.asInterface(service);
-			try {
-				mService.enableService();
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
 		}
 
 		@Override
@@ -54,7 +52,7 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
 	    
-	    startService(new Intent(MainPreferenceActivity.this, ProtectionService.class));
+	    //
 	    
 	    this.addPreferencesFromResource(R.xml.general);
 	    
@@ -72,18 +70,53 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 	    
 	    // Register listener for preference change
 
-	    getPreferenceScreen().getSharedPreferences()
-	    	.registerOnSharedPreferenceChangeListener(this);
+	    
+	}
+	
+	private BroadcastReceiver lockReceiver = new BroadcastReceiver(){
+
+		@Override
+		public void onReceive(Context arg0, Intent arg1) {
+			finish();
+		}
+		
+	};
+	
+	private boolean isReceiverRegistered = false;
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		if(isReceiverRegistered){
+			unregisterReceiver(lockReceiver);
+			isReceiverRegistered =false;
+		}
+		if(mService!=null)
+			unbindService(conn);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(ProtectionService.ACTION_ALARM_FIRED);
+		registerReceiver(lockReceiver, filter);
+		isReceiverRegistered = true;
+		bindService(new Intent(MainPreferenceActivity.this, ProtectionService.class), conn, Context.BIND_AUTO_CREATE);
 	}
 
 	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		getPreferenceScreen().getSharedPreferences()
+    	.registerOnSharedPreferenceChangeListener(this);
+		
 		getMenuInflater().inflate(R.menu.general, menu);
 		
 		// Get an instance of switch on the actionview
 		if(Build.VERSION.SDK_INT >= 14){
 			Switch enableSwitch = (Switch)menu.getItem(0).getActionView();
+			enableSwitch.setChecked(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("enabled", false));
 			enableSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener(){
 	
 				@Override
@@ -103,7 +136,7 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 			return true;
 		}
 		// On Honeycomb or lower, switch is not supported. so we provide
-		// enable/disable switch on the preferences list, rather that on action bar.
+		// enable/disable switch on the preferences list, rather than on action bar.
 		return false;
 	}
 
@@ -115,12 +148,20 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 			boolean enabled = sharedPreferences.getBoolean("enabled", false);
 			Toast.makeText(getApplicationContext(), enabled ? "Protection mode enabled" : "Protection mode disabled", Toast.LENGTH_SHORT).show();
 			if(enabled){
-				
-				bindService(new Intent(MainPreferenceActivity.this, ProtectionService.class), conn, Context.BIND_AUTO_CREATE);
+				if(mService!=null){
+					try{
+						mService.enableService();
+					}catch(RemoteException e){
+						e.printStackTrace();
+					}
+				}else{
+					bindService(new Intent(MainPreferenceActivity.this, ProtectionService.class), conn, Context.BIND_AUTO_CREATE);
+				}
 			}else{
 				if(mService!=null){
 					try {
 						mService.disableService();
+						
 					} catch (RemoteException e) {
 						e.printStackTrace();
 					}

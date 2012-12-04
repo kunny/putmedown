@@ -82,7 +82,8 @@ public class NfcUnlockActivity extends Activity {
             	if(pinInPref.equals(pin)){
             		try{
             			mService.dismissAlarm();
-            			// TODO Play dismiss sound
+            			mService.disableService();
+            			finish();
             		}catch(RemoteException e){
             			e.printStackTrace();
             		}

@@ -36,8 +36,14 @@ public class Util {
 	}
 
 	public static class SensorSupport implements SensorEventListener {
+		
+		public enum AlarmState{NONE, WARNING, ALARM};
+		
 		private static final String TAG = "SensorSupport";
 		private static final String KEY_ALARM_FIRED = "alarm_fired";
+		private static final String KEY_PITCH = "pitch";
+		private static final String KEY_AZIMUTH = "azimuth";
+		private static final String KEY_ROLL = "roll";
 
 		private boolean isTracking = false;
 
@@ -46,6 +52,7 @@ public class Util {
 		private Sensor mAccelerometer;
 		private Sensor mOrientation;
 		private Context mContext;
+		private AlarmState mAlarmState = AlarmState.NONE;
 		
 		private ArrayList<Float> mAxis = new ArrayList<Float>();
 
@@ -91,6 +98,34 @@ public class Util {
 		public boolean isAlarmFired() {
 			return getPref(mContext).getBoolean(KEY_ALARM_FIRED, false);
 		}
+		
+		public void setDevicePosition(float azimuth, float pitch, float roll){
+			Log.d(TAG, "Device position has set to Azimuth : "+azimuth+", Pitch : "+pitch+", Roll : "+roll);
+			getEditor(mContext)
+				.putFloat(KEY_AZIMUTH, azimuth)
+				.putFloat(KEY_PITCH, pitch)
+				.putFloat(KEY_ROLL, roll).commit();
+		}
+		
+		public float getAzimuth(){
+			return getPref(mContext).getFloat(KEY_AZIMUTH, 0.0f);
+		}
+		
+		public float getPitch(){
+			return getPref(mContext).getFloat(KEY_PITCH, 0.0f);
+		}
+		
+		public float getRoll(){
+			return getPref(mContext).getFloat(KEY_ROLL, 0.0f);
+		}
+		
+		public AlarmState getAlarmState(){
+			return mAlarmState;
+		}
+		
+		public void setAlarmState(AlarmState state){
+			mAlarmState = state;
+		}
 
 		public synchronized void startTracking() {
 			isTracking = true;
@@ -100,6 +135,29 @@ public class Util {
 					SensorManager.SENSOR_DELAY_NORMAL);
 
 			Log.d(TAG, "Sensor tracking started.");
+		}
+		
+		SensorEventListener stabilizeListener = new SensorEventListener(){
+
+			@Override
+			public void onAccuracyChanged(Sensor sensor, int accuracy) {
+			}
+
+			@Override
+			public void onSensorChanged(SensorEvent event) {
+				setDevicePosition(event.values[0], event.values[1], event.values[2]);
+				axis_x = event.values[0];
+				axis_y = event.values[1];
+				axis_z = event.values[2];
+				
+				mSensorManager.unregisterListener(stabilizeListener);
+				startTracking();
+			}
+			
+		};
+		
+		public void stabilize(){
+			mSensorManager.registerListener(stabilizeListener, mOrientation, SensorManager.SENSOR_DELAY_NORMAL);
 		}
 
 		public synchronized void stopTracking() {
@@ -118,6 +176,15 @@ public class Util {
 			Log.d(TAG, "onAccuracyChanged: " + sensor + ", accuracy: "
 					+ accuracy);
 		}
+		
+		private float azimuthDelta;
+		private float pitchDelta;
+		private float rollDelta;
+		
+		private boolean azimuthAlarm;
+		private boolean pitchAlarm;
+		private boolean rollAlarm;
+		private boolean accAlarm;
 
 		@Override
 		public void onSensorChanged(SensorEvent event) {
@@ -127,7 +194,63 @@ public class Util {
 			// mListener.onAlarm();
 			// }else if(isAlarmFired())
 			// mListener.onDismiss();
+			
+			azimuthDelta = 0.0f;
+			pitchDelta = 0.0f;
+			rollDelta = 0.0f;
+			
+			switch(event.sensor.getType()){
+			case Sensor.TYPE_ORIENTATION:
+				azimuthDelta = Math.abs(axis_x-event.values[0]);
+				pitchDelta = Math.abs(axis_y-event.values[1]);
+				rollDelta = Math.abs(axis_z-event.values[2]);
+				
+				if(azimuthDelta < 20){
+					azimuthAlarm = false;
+				}else{
+					azimuthAlarm = true;
+				}
+				
+				if(pitchDelta < 10){
+					pitchAlarm = false;
+				}else{
+					pitchAlarm = true;
+				}
+				
+				if(rollDelta < 10){
+					rollAlarm = false;
+				}else{
+					rollAlarm = true;
+				}
+				
+				break;
+				
+			case Sensor.TYPE_ACCELEROMETER:
+				
+				break;
+			}
+			
+			switch(mAlarmState){
+			case NONE:
+				if(rollAlarm || pitchAlarm || azimuthAlarm){
+					mAlarmState = AlarmState.ALARM;
+					mListener.onAlarm();
+				}
+				break;
+				
+			case WARNING:
+				
+				break;
+				
+			case ALARM:
+				if(!rollAlarm && !pitchAlarm && !azimuthAlarm){
+					mAlarmState = AlarmState.NONE;
+					mListener.onDismiss();
+				}
+				break;
+			}
 
+			/*
 			if (event.sensor == mOrientation) {
 				rot_x = event.values[0];
 				rot_y = event.values[1];
@@ -171,7 +294,7 @@ public class Util {
 				}else if(isAlarmFired()){
 					mListener.onDismiss();
 				}
-			}
+			}*/
 		}
 	}
 
@@ -233,6 +356,8 @@ public class Util {
 		
 		private HashMap<String, Integer> mSoundIds;
 		
+		private int alarmStreamId;
+		
 		public SoundSupport(Context context){
 			mContext = context;
 			mSoundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
@@ -290,11 +415,11 @@ public class Util {
 				
 			case ALARM:
 				mSoundPool.play(mSoundIds.get(mAlarmSounds[0]), 1.0f, 1.0f, 1, 0, 1.0f);
-				mSoundPool.play(mSoundIds.get(mAlarmSounds[1]), 1.0f, 1.0f, 1, -1, 1.0f);
+				alarmStreamId = mSoundPool.play(mSoundIds.get(mAlarmSounds[1]), 1.0f, 1.0f, 1, -1, 1.0f);
 				break;
 				
 			case DISMISS:
-				mSoundPool.stop(mSoundIds.get(mAlarmSounds[1]));
+				mSoundPool.stop(alarmStreamId);
 				mSoundPool.play(mSoundIds.get(getRandomSoundNameOnList(mDismissSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
 				break;
 				
