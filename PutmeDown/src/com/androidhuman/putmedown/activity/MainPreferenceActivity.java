@@ -204,11 +204,12 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 						
 					}
 					// NFC is available
-					sharedPreferences.edit().putString("unlock_method", "nfc");
+					sharedPreferences.edit().putString("unlock_method", "nfc").commit();
 					unlockMethodPref.setSummary(R.string.nfc);
 					detailSettingPref.setSummary(R.string.set_nfc_tag_to_unlock);
 				}
 			}else{
+				sharedPreferences.edit().putString("unlock_method", "pin").commit();
 				unlockMethodPref.setSummary(R.string.pin);
 				detailSettingPref.setSummary(R.string.set_pin_to_unlock);
 			}

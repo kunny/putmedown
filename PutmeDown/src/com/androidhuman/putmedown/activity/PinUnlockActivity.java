@@ -48,6 +48,7 @@ public class PinUnlockActivity extends Activity {
 	    
 	    edtPinInput = (EditText)findViewById(R.id.edt_activity_pin_unlock_input);
 	    btnDone = (Button)findViewById(R.id.btn_activity_pin_unlock_done);
+	    
 	    btnDone.setOnClickListener(new OnClickListener(){
 
 			@Override

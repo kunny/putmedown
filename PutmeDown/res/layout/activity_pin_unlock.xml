@@ -31,7 +31,6 @@
         android:id="@+id/btn_activity_pin_unlock_done"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:enabled="false"
         android:text="@string/done" />
 
 </LinearLayout>

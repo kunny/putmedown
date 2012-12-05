@@ -117,6 +117,7 @@ public class ProtectionService extends Service{
 		String unlockMethod = PreferenceManager
 				.getDefaultSharedPreferences(getApplicationContext())
 				.getString("unlock_method", "pin");
+		System.out.println("unlockmethod="+unlockMethod);
 		
 		PendingIntent intent = 
 				PendingIntent.getActivity(getApplicationContext(), 0, 
