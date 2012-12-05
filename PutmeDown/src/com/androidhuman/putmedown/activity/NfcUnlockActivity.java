@@ -21,6 +21,7 @@ import com.androidhuman.putmedown.service.IProtectionService;
 import com.androidhuman.putmedown.service.ProtectionService;
 import com.androidhuman.putmedown.util.Util.Security;
 import com.androidhuman.putmedown.util.Util.Security.PinType;
+import com.androidhuman.putmedown.util.Util.SoundSupport.SoundType;
 
 public class NfcUnlockActivity extends Activity {
 	
@@ -89,7 +90,6 @@ public class NfcUnlockActivity extends Activity {
             		}
             	}else{
             		Toast.makeText(getApplicationContext(), R.string.invalid_tag, Toast.LENGTH_SHORT).show();
-            		// TODO play error sound
             	}
             }
         }
