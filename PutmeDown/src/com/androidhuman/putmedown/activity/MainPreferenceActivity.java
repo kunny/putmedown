@@ -52,7 +52,7 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
 	    
-	    //
+	    startService(new Intent(this, ProtectionService.class));
 	    
 	    this.addPreferencesFromResource(R.xml.general);
 	    
@@ -103,13 +103,14 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 		registerReceiver(lockReceiver, filter);
 		isReceiverRegistered = true;
 		bindService(new Intent(MainPreferenceActivity.this, ProtectionService.class), conn, Context.BIND_AUTO_CREATE);
+		getPreferenceScreen().getSharedPreferences()
+    	.registerOnSharedPreferenceChangeListener(this);
 	}
 
 	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getPreferenceScreen().getSharedPreferences()
-    	.registerOnSharedPreferenceChangeListener(this);
+		
 		
 		getMenuInflater().inflate(R.menu.general, menu);
 		
@@ -148,14 +149,13 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 			boolean enabled = sharedPreferences.getBoolean("enabled", false);
 			Toast.makeText(getApplicationContext(), enabled ? "Protection mode enabled" : "Protection mode disabled", Toast.LENGTH_SHORT).show();
 			if(enabled){
+				bindService(new Intent(MainPreferenceActivity.this, ProtectionService.class), conn, Context.BIND_AUTO_CREATE);
 				if(mService!=null){
 					try{
 						mService.enableService();
 					}catch(RemoteException e){
 						e.printStackTrace();
 					}
-				}else{
-					bindService(new Intent(MainPreferenceActivity.this, ProtectionService.class), conn, Context.BIND_AUTO_CREATE);
 				}
 			}else{
 				if(mService!=null){
@@ -166,7 +166,8 @@ public class MainPreferenceActivity extends PreferenceActivity implements OnShar
 						e.printStackTrace();
 					}
 				}
-				stopService(new Intent(MainPreferenceActivity.this, ProtectionService.class));
+				//stopService(new Intent(MainPreferenceActivity.this, ProtectionService.class));
+				finish();
 			}
 		}else if(key.equals("unlock_method")){
 			String value = sharedPreferences.getString("unlock_method", "pin");

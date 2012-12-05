@@ -81,11 +81,12 @@ public class ProtectionService extends Service{
 		public void disableService() throws RemoteException {
 			PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("enabled", false).commit();
 			//disableChargerTracking(true);
+			mSensorSupport.setAlarmFired(false);
+			dismissNotification();
+			
 			mSensorSupport.stopTracking();
 			mSoundSupport.play(SoundType.SHUTDOWN);
-			mSoundSupport = null;
-			mSensorSupport = null;
-			stopSelf();
+			
 		}
 
 		@Override
@@ -171,6 +172,7 @@ public class ProtectionService extends Service{
 	
 	@Override
 	public IBinder onBind(Intent intent) {
+		System.out.println("onBind()");
 		return mBinder;
 	}
 
@@ -180,6 +182,7 @@ public class ProtectionService extends Service{
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		System.out.println("onCreate");
 		if(mSensorSupport==null){
 			mSensorSupport = new SensorSupport(this, mAntiTheftListener);
 		}
@@ -191,11 +194,18 @@ public class ProtectionService extends Service{
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		
+		System.out.println("dd");
 		return Service.START_NOT_STICKY;
 	}
 	
 	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		System.out.println("destroy");
+	}
+
+
 	public interface AntiTheftListener{
 		
 		/**

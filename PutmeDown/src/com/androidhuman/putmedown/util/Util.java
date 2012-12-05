@@ -424,6 +424,7 @@ public class Util {
 				break;
 				
 			case SHUTDOWN:
+				mSoundPool.stop(alarmStreamId);
 				mSoundPool.play(mSoundIds.get(getRandomSoundNameOnList(mShutdownSounds)), 1.0f, 1.0f, 1, 0, 1.0f);
 				break;
 				
